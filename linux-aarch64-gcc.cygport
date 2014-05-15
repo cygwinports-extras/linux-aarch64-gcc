@@ -1,0 +1,155 @@
+TOOLCHAIN_TARGET="aarch64-unknown-linux-gnu"
+inherit toolchain
+
+NAME="linux-aarch64-gcc"
+VERSION=4.9.0
+RELEASE=1
+CATEGORY="Devel"
+SUMMARY="GCC for Linux aarch64 toolchain"
+DESCRIPTION="The GNU Compiler Collection includes front ends for C, C++,
+Objective-C, Fortran, Java, and Ada, as well as libraries for these languages
+(libstdc++, libgcj, etc.).  This package provides cross-compilers for the
+GNU/Linux ARM hard-float platform (aarch64-unknown-linux-gnu)."
+HOMEPAGE="http://gcc.gnu.org/"
+
+case ${VERSION} in
+*.*-20[1-9][0-9][01][0-9][0-3][0-9])
+	SRC_URI="mirror://gcc/snapshots/${VERSION}/gcc-${VERSION}.tar.bz2"
+	;;
+*)	SRC_URI="mirror://gnu/gcc/gcc-${VERSION}/gcc-${VERSION}.tar.bz2"
+	;;
+esac
+SRC_DIR="gcc-${VERSION}"
+
+PATCH_URI="
+	http://pkgs.fedoraproject.org/cgit/gcc.git/plain/gcc49-aarch64-ada.patch
+	http://pkgs.fedoraproject.org/cgit/gcc.git/plain/gcc49-color-auto.patch
+	4.7.0-cross-datadir.patch
+	4.7.0-cross-ecjx.patch
+	4.7-libffi-noinst.patch
+	4.8-lto-plugin-soname.patch
+	4.6-textdomain.patch
+	4.8-Wimplicit-decls.patch
+"
+
+PKG_NAMES="${NAME}-core ${NAME}-g++ ${NAME}-fortran ${NAME}-go ${NAME}-objc ${NAME}-objc++"
+linux_aarch64_gcc_core_REQUIRES="linux-aarch64-binutils"
+linux_aarch64_gcc_core_SUMMARY="${SUMMARY} (C, OpenMP)"
+linux_aarch64_gcc_core_CONTENTS="
+	--exclude=c++ --exclude=objc --exclude=gcj --exclude=ffi*.h --exclude=jni*.h
+	usr/bin/${TOOLCHAIN_TARGET}-cpp.exe
+	usr/bin/${TOOLCHAIN_TARGET}-gcc.exe
+	usr/bin/${TOOLCHAIN_TARGET}-gcc-*.exe
+	usr/bin/${TOOLCHAIN_TARGET}-gcov.exe
+	usr/lib/gcc/${TOOLCHAIN_TARGET}/${VERSION}/cc1.exe
+	usr/lib/gcc/${TOOLCHAIN_TARGET}/${VERSION}/collect2.exe
+	usr/lib/gcc/${TOOLCHAIN_TARGET}/${VERSION}/crt*.o
+	usr/lib/gcc/${TOOLCHAIN_TARGET}/${VERSION}/cyglto_plugin.dll
+	usr/lib/gcc/${TOOLCHAIN_TARGET}/${VERSION}/include-fixed/
+	usr/lib/gcc/${TOOLCHAIN_TARGET}/${VERSION}/include/
+	usr/lib/gcc/${TOOLCHAIN_TARGET}/${VERSION}/install-tools/
+	usr/lib/gcc/${TOOLCHAIN_TARGET}/${VERSION}/libatomic*
+	usr/lib/gcc/${TOOLCHAIN_TARGET}/${VERSION}/libgcc*
+	usr/lib/gcc/${TOOLCHAIN_TARGET}/${VERSION}/libgcov.*
+	usr/lib/gcc/${TOOLCHAIN_TARGET}/${VERSION}/libgomp.*
+	usr/lib/gcc/${TOOLCHAIN_TARGET}/${VERSION}/libssp*
+	usr/lib/gcc/${TOOLCHAIN_TARGET}/${VERSION}/lto*.exe
+	usr/share/doc/
+	usr/share/locale/*/LC_MESSAGES/aarch64-linux-*
+	usr/share/man/man1/${TOOLCHAIN_TARGET}-cpp.1*
+	usr/share/man/man1/${TOOLCHAIN_TARGET}-gcc.1*
+	usr/share/man/man1/${TOOLCHAIN_TARGET}-gcov.1*
+"
+linux_aarch64_gcc_g___SUMMARY="${SUMMARY} (C++)"
+linux_aarch64_gcc_g___CONTENTS="
+	--exclude=gcj --exclude=gnu --exclude=java --exclude=javax --exclude=org
+	usr/bin/${TOOLCHAIN_TARGET}-c++.exe
+	usr/bin/${TOOLCHAIN_TARGET}-g++.exe
+	usr/lib/gcc/${TOOLCHAIN_TARGET}/${VERSION}/cc1plus.exe
+	usr/lib/gcc/${TOOLCHAIN_TARGET}/${VERSION}/include/c++/
+	usr/lib/gcc/${TOOLCHAIN_TARGET}/${VERSION}/libstdc++.*
+	usr/lib/gcc/${TOOLCHAIN_TARGET}/${VERSION}/libsupc++.*
+	usr/share/gcc-${VERSION}/${TOOLCHAIN_TARGET}/python/libstdcxx/
+	usr/share/man/man1/${TOOLCHAIN_TARGET}-g++.1*
+"
+linux_aarch64_gcc_fortran_SUMMARY="${SUMMARY} (Fortran)"
+linux_aarch64_gcc_fortran_CONTENTS="
+	usr/bin/${TOOLCHAIN_TARGET}-gfortran.exe
+	usr/lib/gcc/${TOOLCHAIN_TARGET}/${VERSION}/f951.exe
+	usr/lib/gcc/${TOOLCHAIN_TARGET}/${VERSION}/finclude/
+	usr/lib/gcc/${TOOLCHAIN_TARGET}/${VERSION}/libcaf_single.*
+	usr/lib/gcc/${TOOLCHAIN_TARGET}/${VERSION}/libgfortran*
+	usr/share/man/man1/${TOOLCHAIN_TARGET}-gfortran.1*
+"
+linux_aarch64_gcc_ada_SUMMARY="${SUMMARY} (Ada)"
+linux_aarch64_gcc_ada_CONTENTS="
+	usr/bin/${TOOLCHAIN_TARGET}-gnat*
+	usr/lib/gcc/${TOOLCHAIN_TARGET}/${VERSION}/adainclude/
+	usr/lib/gcc/${TOOLCHAIN_TARGET}/${VERSION}/adalib/
+	usr/lib/gcc/${TOOLCHAIN_TARGET}/${VERSION}/gnat1.exe
+"
+linux_aarch64_gcc_go_SUMMARY="${SUMMARY} (Go)"
+linux_aarch64_gcc_go_CONTENTS="
+	usr/bin/${TOOLCHAIN_TARGET}-gccgo*
+	usr/lib/gcc/${TOOLCHAIN_TARGET}/${VERSION}/go1.exe
+	usr/lib/gcc/${TOOLCHAIN_TARGET}/${VERSION}/libgo.*
+	usr/lib/gcc/${TOOLCHAIN_TARGET}/${VERSION}/libgobegin.*
+	usr/lib/gcc/${TOOLCHAIN_TARGET}/${VERSION}/go/
+	usr/share/man/man1/${TOOLCHAIN_TARGET}-gccgo.1*
+"
+linux_aarch64_gcc_objc_SUMMARY="${SUMMARY} (Objective-C)"
+linux_aarch64_gcc_objc_CONTENTS="
+	usr/lib/gcc/${TOOLCHAIN_TARGET}/${VERSION}/cc1obj.exe
+	usr/lib/gcc/${TOOLCHAIN_TARGET}/${VERSION}/include/objc/
+	usr/lib/gcc/${TOOLCHAIN_TARGET}/${VERSION}/libobjc.*
+"
+linux_aarch64_gcc_objc___REQUIRES="${NAME}-core ${NAME}-g++ ${NAME}-objc"
+linux_aarch64_gcc_objc___SUMMARY="${SUMMARY} (Objective-C++)"
+linux_aarch64_gcc_objc___CONTENTS="
+	usr/lib/gcc/${TOOLCHAIN_TARGET}/${VERSION}/cc1objplus.exe
+"
+
+DEPS_PATH="${TOOLCHAIN_SYSROOT}/usr/lib"
+
+# libitm: not supported yet on aarch64
+CYGCONF_ARGS="
+	--libexecdir=/usr/lib
+	--enable-shared --enable-shared-libgcc --enable-static
+	--enable-languages=c,c++,fortran,go,lto,objc,obj-c++
+	--enable-version-specific-runtime-libs
+	--disable-multilib
+	--enable-libatomic
+	--enable-libgo
+	--enable-libgomp
+	--disable-libitm
+	--enable-libquadmath
+	--enable-libquadmath-support
+	--enable-libssp
+	--with-dwarf2
+	--with-gnu-as --with-gnu-ld
+	--with-cloog-include=/usr/include/cloog-isl
+	--with-system-zlib
+"
+
+src_install() {
+	cd ${B}
+	cyginstall -j1
+
+	# Workaround GCC multilib install bugs
+#	mv ${D}/usr/lib/gcc/${TOOLCHAIN_TARGET}/lib/go ${D}/usr/lib/gcc/${TOOLCHAIN_TARGET}/${VERSION}/32/
+	mv ${D}/usr/lib/gcc/${TOOLCHAIN_TARGET}/lib64/go ${D}/usr/lib/gcc/${TOOLCHAIN_TARGET}/${VERSION}/
+
+#	mv ${D}/usr/lib/gcc/${TOOLCHAIN_TARGET}/lib/libgcc_s.* ${D}/usr/lib/gcc/${TOOLCHAIN_TARGET}/${VERSION}/32/
+	mv ${D}/usr/lib/gcc/${TOOLCHAIN_TARGET}/lib64/libgcc_s.* ${D}/usr/lib/gcc/${TOOLCHAIN_TARGET}/${VERSION}/
+
+	# Remove Cygwin-host libiberty.a
+	rm -f ${D}/usr/lib/libiberty.a
+
+#	dodir ${TOOLCHAIN_LIBDIR}/pkgconfig
+#	mv ${D}/usr/${TOOLCHAINT_TARGET}/lib/pkgconfig/* ${D}${TOOLCHAIN_LIBDIR}/pkgconfig/
+
+	# conflicts with native gcc
+	rm -fr ${D}/usr/share/{info,man/man7}
+}
+
+KEEP_LA_FILES="none"
