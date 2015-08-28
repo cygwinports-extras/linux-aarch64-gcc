@@ -25,8 +25,6 @@ PATCH_URI="
 	http://pkgs.fedoraproject.org/cgit/gcc.git/plain/gcc49-aarch64-ada.patch
 	http://pkgs.fedoraproject.org/cgit/gcc.git/plain/gcc49-color-auto.patch
 	4.7.0-cross-datadir.patch
-	4.7.0-cross-ecjx.patch
-	4.7-libffi-noinst.patch
 	4.8-lto-plugin-soname.patch
 	4.6-textdomain.patch
 	4.8-Wimplicit-decls.patch
@@ -144,9 +142,6 @@ src_install() {
 
 	# Remove Cygwin-host libiberty.a
 	rm -f ${D}/usr/lib/libiberty.a
-
-#	dodir ${TOOLCHAIN_LIBDIR}/pkgconfig
-#	mv ${D}/usr/${TOOLCHAINT_TARGET}/lib/pkgconfig/* ${D}${TOOLCHAIN_LIBDIR}/pkgconfig/
 
 	# conflicts with native gcc
 	rm -fr ${D}/usr/share/{info,man/man7}
